@@ -9,29 +9,13 @@ import re
 
 PYPI_ENDPOINT = "http://pypi.python.org/pypi"
 
-parser = argparse.ArgumentParser()
-parser.add_argument("-v", "--verbose", action="store_true", default=False)
-parser.add_argument("package", metavar='PACKAGE')
-args = parser.parse_args()
+def build_formula(package_info):
+    name = package_info['data']['name']
+    filename = "%s/%s.rb" % (tempfile.gettempdir(), name)
+    klass = "".join(map(str.capitalize, re.findall('[a-zA-Z]+', name)))
 
-package = args.package
-client = xmlrpclib.ServerProxy(PYPI_ENDPOINT)
-releases = client.package_releases(package)
-
-if len(releases) == 0:
-    sys.stderr.write("Could not find a valid package '%s'\n" % package)
-    exit(1)
-
-main_release = releases[0]
-data    = client.release_data(package, main_release)
-name    = data['name'].lower()
-klass   = "".join(map(str.capitalize, re.findall('[a-zA-Z]+', data['name'])))
-
-filename = "%s/%s.rb" % (tempfile.gettempdir(), name)
-f = open(filename, 'w')
-
-formula_contents = """
-require 'formula'
+    with open(filename, 'w') as fp:
+        formula = """require 'formula'
 
 class PipFormula < Formula
   class NoopDownloadStrategy < AbstractDownloadStrategy
@@ -55,14 +39,59 @@ class %(klass)s < PipFormula
   version "%(version)s"
   homepage "%(homepage)s"
 end
-""".strip() % {'klass': klass, 'url': data['download_url'], 'homepage': data['home_page'], 'version': data['version']}
+"""
+        info = dict(url=package_info['urls']['url'],
+                    version=package_info['data']['version'],
+                    homepage=package_info['data']['home_page'],
+                    klass=klass)
 
-f.write(formula_contents+"\n")
-f.close()
+        fp.write(formula % info)
 
-if args.verbose:
-    print "Formula is:"
-    print formula_contents
+    return filename
 
-os.system("brew install %s %s" % ("-v" if args.verbose else "", filename))
-os.remove(filename)
+def get_package_info(package):
+    """
+    Return a dictionary of relevant info for the package.
+    """
+    client = xmlrpclib.ServerProxy(PYPI_ENDPOINT)
+
+    if '==' in package:
+        (package, version) = package.split('==')
+    else:
+        releases = client.package_releases(package)
+        if not releases:
+            sys.stderr.write("Couldn't find any packages named '%s'\n" % package)
+            sys.exit(1)
+        version = releases[0]
+
+    return dict(urls=client.release_urls(package, version)[0],
+                data=client.release_data(package, version))
+
+def install_or_upgrade(args):
+    package_info = get_package_info(args.package)
+    filename = build_formula(package_info)
+    verbose = "-v" if args.verbose else ""
+    os.system("brew %s %s %s" % (args.action, verbose, filename))
+    os.remove(filename)
+
+def remove(args):
+    os.system("brew unlink %s %s" % ("-v" if args.verbose else "", args.package))
+    os.system("brew rm %s %s" % ("-v" if args.verbose else "", args.package))
+
+parser = argparse.ArgumentParser(prog='brew pip')
+parser.add_argument("-v", "--verbose", action="store_true", default=False, help="be verbose")
+subparsers = parser.add_subparsers(dest="action")
+
+remove_parser = subparsers.add_parser('remove', help="unlink and remove the package")
+remove_parser.set_defaults(func=remove)
+
+install_parser = subparsers.add_parser('install', help="install the package")
+install_parser.set_defaults(func=install_or_upgrade)
+
+upgrade_parser = subparsers.add_parser('upgrade', help="upgrade the package")
+upgrade_parser.set_defaults(func=install_or_upgrade)
+
+parser.add_argument("package", help="name of the package to install")
+args = parser.parse_args()
+
+args.func(args)
