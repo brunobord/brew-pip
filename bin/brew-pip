@@ -45,7 +45,8 @@ class PipFormula < Formula
 
   def install
     system "pip", "install", "#{name}==#{version}",
-      "--install-option=--prefix=#{prefix}"
+      "--install-option=--prefix=#{prefix}",
+      "--install-option=--install-scripts=#{prefix}/share/python"
   end
 end
 
