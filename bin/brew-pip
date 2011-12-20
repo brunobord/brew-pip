@@ -7,13 +7,15 @@ import tempfile
 import xmlrpclib
 import re
 
+PYPI_ENDPOINT = "http://pypi.python.org/pypi"
+
 parser = argparse.ArgumentParser()
 parser.add_argument("-v", "--verbose", action="store_true", default=False)
 parser.add_argument("package", metavar='PACKAGE')
 args = parser.parse_args()
 
 package = args.package
-client = xmlrpclib.ServerProxy('http://pypi.python.org/pypi')
+client = xmlrpclib.ServerProxy(PYPI_ENDPOINT)
 releases = client.package_releases(package)
 
 if len(releases) == 0:
