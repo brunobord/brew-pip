@@ -2,35 +2,26 @@
 
 import os
 import sys
+import argparse
 import tempfile
 import xmlrpclib
 import re
 
-argv = sys.argv
-if len(argv) < 2:
-    sys.stderr.write("Please specify a package name (e.g. brew pip <name>)\n")
-    exit(1)
+parser = argparse.ArgumentParser()
+parser.add_argument("-v", "--verbose", action="store_true", default=False)
+parser.add_argument("package", metavar='PACKAGE')
+args = parser.parse_args()
 
-
-verbose = False
-if "-v" in argv:
-    argv.remove("-v")
-    verbose = True
-elif "--version" in argv:
-    argv.remove("--version")
-    verbose = True
-
-
+package = args.package
 client = xmlrpclib.ServerProxy('http://pypi.python.org/pypi')
-
-releases = client.package_releases(argv[1])
+releases = client.package_releases(package)
 
 if len(releases) == 0:
-    sys.stderr.write("Could not find a valid package '%s'\n" % argv[1])
+    sys.stderr.write("Could not find a valid package '%s'\n" % package)
     exit(1)
 
 main_release = releases[0]
-data    = client.release_data(argv[1], main_release)
+data    = client.release_data(package, main_release)
 name    = data['name'].lower()
 klass   = "".join(map(str.capitalize, re.findall('[a-zA-Z]+', data['name'])))
 
@@ -66,12 +57,9 @@ end
 f.write(formula_contents+"\n")
 f.close()
 
-verbose_switch = ""
-if verbose:
-    verbose_switch = "-v"
+if args.verbose:
     print "Formula is:"
     print formula_contents
 
-
-os.system("brew install %s %s" % (verbose_switch, filename))
+os.system("brew install %s %s" % ("-v" if args.verbose else "", filename))
 os.remove(filename)
