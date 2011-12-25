@@ -10,8 +10,6 @@ Install
 
     brew install https://raw.github.com/edavis/brew-pip/master/brew-pip.rb
 
-Only requirement is Python 2.7, Homebrew's default version of python.
-
 Usage
 -----
 
