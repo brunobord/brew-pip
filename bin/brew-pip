@@ -3,9 +3,7 @@
 import os
 import sys
 import argparse
-import tempfile
 import xmlrpclib
-import re
 
 PYPI_ENDPOINT = "http://pypi.python.org/pypi"
 HOMEBREW_CELLAR = os.environ.get("HOMEBREW_CELLAR", "/usr/local/Cellar")
