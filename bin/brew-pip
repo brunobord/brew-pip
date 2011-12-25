@@ -8,90 +8,75 @@ import xmlrpclib
 import re
 
 PYPI_ENDPOINT = "http://pypi.python.org/pypi"
+HOMEBREW_CELLAR = os.environ.get("HOMEBREW_CELLAR", "/usr/local/Cellar")
 
-def build_formula(package_info):
-    name = package_info['data']['name']
-    filename = "%s/%s.rb" % (tempfile.gettempdir(), name)
-    klass = "".join(map(str.capitalize, re.findall('[a-zA-Z]+', name)))
+def get_cache_dir():
+    """
+    Return location to store pip downloads
 
-    with open(filename, 'w') as fp:
-        formula = """require 'formula'
-
-class PipFormula < Formula
-  class NoopDownloadStrategy < AbstractDownloadStrategy
-    def fetch; end
-    def stage; end
-  end
-
-  def download_strategy
-    NoopDownloadStrategy
-  end
-
-  def install
-    system "pip", "install", "#{name}==#{version}",
-      "--install-option=--prefix=#{prefix}",
-      "--install-option=--install-scripts=#{prefix}/share/python"
-  end
-end
-
-class %(klass)s < PipFormula
-  url "%(url)s"
-  version "%(version)s"
-  homepage "%(homepage)s"
-end
-"""
-        info = dict(url=package_info['urls']['url'],
-                    version=package_info['data']['version'],
-                    homepage=package_info['data']['home_page'],
-                    klass=klass)
-
-        fp.write(formula % info)
-
-    return filename
+    Try PIP_DOWNLOAD_CACHE first, then HOMEBREW_CACHE.
+    """
+    for var in ['PIP_DOWNLOAD_CACHE', 'HOMEBREW_CACHE']:
+        if var in os.environ:
+            return os.environ[var]
 
 def get_package_info(package):
     """
-    Return a dictionary of relevant info for the package.
+    Return (package_name, version) for a given package.
+
+    If the version isn't specified in package, query PyPI for the
+    latest.
+
+    >>> get_package_info('Django==1.2')
+    ('django', '1.2')
+    >>> get_package_info('django')
+    ('django', '1.3.1')
     """
     client = xmlrpclib.ServerProxy(PYPI_ENDPOINT)
-
     if '==' in package:
         (package, version) = package.split('==')
     else:
         releases = client.package_releases(package)
         if not releases:
-            sys.stderr.write("Couldn't find any packages named '%s'\n" % package)
-            sys.exit(1)
-        version = releases[0]
+            if package.islower():
+                # Try again capitalizing it
+                return get_package_info(package.capitalize())
+            else:
+                sys.stderr.write("Couldn't find any packages named '%s'\n" % package)
+                sys.exit(1)
+        else:
+            version = releases[0]
+    # Lowercase the package name for consistency sake
+    return (package.lower(), str(version))
 
-    return dict(urls=client.release_urls(package, version)[0],
-                data=client.release_data(package, version))
+def main(args):
+    for package in args.package:
+        (package, version) = get_package_info(package)
 
-def install_or_upgrade(args):
-    package_info = get_package_info(args.package)
-    filename = build_formula(package_info)
-    verbose = "-v" if args.verbose else ""
-    os.system("brew %s %s %s" % (args.action, verbose, filename))
-    os.remove(filename)
+        if args.upgrade:
+            # Delete the old version
+            os.system("brew rm %s" % package)
 
-def remove(args):
-    os.system("brew unlink %s %s" % ("-v" if args.verbose else "", args.package))
-    os.system("brew rm %s %s" % ("-v" if args.verbose else "", args.package))
+        prefix = os.path.join(HOMEBREW_CELLAR, package, version)
+        cache = get_cache_dir()
+        cmd = ["pip", "install",
+               "-v" if args.verbose else "",
+               "%s==%s" % (package, version),
+               "--download-cache=%s" % cache if cache else "",
+               "--install-option=--prefix=%s" % prefix,
+               "--install-option=--install-scripts=%s" % os.path.join(prefix, "share", "python")]
+
+        if args.verbose:
+            print " ".join(cmd)
+
+        os.system(" ".join(cmd))
+
+        if not args.keg_only:
+            os.system("brew link %s" % package)
 
 parser = argparse.ArgumentParser(prog='brew pip')
 parser.add_argument("-v", "--verbose", action="store_true", default=False, help="be verbose")
-subparsers = parser.add_subparsers(dest="action")
-
-remove_parser = subparsers.add_parser('remove', help="unlink and remove the package")
-remove_parser.set_defaults(func=remove)
-
-install_parser = subparsers.add_parser('install', help="install the package")
-install_parser.set_defaults(func=install_or_upgrade)
-
-upgrade_parser = subparsers.add_parser('upgrade', help="upgrade the package")
-upgrade_parser.set_defaults(func=install_or_upgrade)
-
-parser.add_argument("package", help="name of the package to install")
-args = parser.parse_args()
-
-args.func(args)
+parser.add_argument("-k", "--keg-only", action="store_true", default=False, help="don't link files into prefix")
+parser.add_argument("-u", "--upgrade", action="store_true", default=False, help="upgrade the package")
+parser.add_argument("package", nargs='+', help="name of the package(s) to install")
+main(parser.parse_args())
