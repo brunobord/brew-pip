@@ -41,3 +41,15 @@ So python can load your installed libraries, you need to update your `PYTHONPATH
 And for any scripts to be found, you need to update your `PATH`:
 
     export PATH=$PATH:$(brew --prefix)/share/python
+
+But doesn't everybody use virtualenv now?
+-----------------------------------------
+
+Why, yes, they do.  But that doesn't mean global installations are
+totally useless.  What if you want to use a package *without* being
+active in a virtualenv -- like say ipython?
+
+With `brew pip` you can globally install a select few packages while
+relying on virtualenv for everything else.
+
+It's the best of both worlds.
