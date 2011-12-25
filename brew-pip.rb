@@ -9,4 +9,11 @@ class BrewPip < Formula
   def install
     bin.install 'bin/brew-pip'
   end
+
+  def caveats; <<-EOS.undent
+    pip needs to be installed before brew-pip will work:
+
+        #{HOMEBREW_PREFIX+"share/python"}/easy_install pip
+    EOS
+  end
 end
