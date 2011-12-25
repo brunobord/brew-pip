@@ -8,13 +8,7 @@
 Install
 -------
 
-    curl -s https://raw.github.com/edavis/brew-pip/master/bin/brew-pip > ~/bin/brew-pip
-    chmod +x ~/bin/brew-pip
-
-Or:
-
-    git clone git://github.com/edavis/brew-pip ~/src/brew-pip
-    ln -s ~/src/brew-pip/bin/brew-pip ~/bin/brew-pip
+    brew install https://raw.github.com/edavis/brew-pip/master/brew-pip.rb
 
 Only requirement is Python 2.7, Homebrew's default version of python.
 
