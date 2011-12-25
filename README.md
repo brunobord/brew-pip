@@ -1,28 +1,43 @@
-brew-pip -- install pip packages as homebrew formulas
-=====================================================
+homebrew + pip = brew-pip
+=========================
 
-`brew pip` allows you to install any pip package as a homebrew formula.
+`brew pip` installs python packages inside of Homebrew.
+
+For example, `brew pip Django==1.3.1` installs all its files under
+`/usr/local/Cellar/django/1.3.1`.  Those files, in turn, get symlinked
+into `/usr/local/lib/python2.7/site-packages` and
+`/usr/local/share/python` so you can easily make use of them.
 
 Install
 -------
 
-    brew install brew-pip
+    curl -s https://raw.github.com/edavis/brew-pip/master/bin/brew-pip > ~/bin/brew-pip
+    chmod +x ~/bin/brew-pip
+
+Or:
+
+    git clone git://github.com/edavis/brew-pip ~/src/brew-pip
+    ln -s ~/src/brew-pip/bin/brew-pip ~/bin/brew-pip
+
+Only requirement is Python 2.7, Homebrew's default version of python.
 
 Usage
 -----
 
-    brew pip Mercurial
+    brew pip mercurial        # install the latest mercurial package
+    brew pip django==1.2      # install django-1.2
+    brew pip -u django==1.3.1 # upgrade to django-1.3.1
+    brew pip -k ipython       # install ipython, but don't link it (i.e., keg-only)
+    brew rm django            # uninstallation taken care of by homebrew itself
+    brew pip -h               # for help
 
 Setup
 -----
 
-After you install some pip packages, you will need to add Homebrew's pip path to your PYTHONPATH.
-
-You can add something like the following to your ~/.bash_profile:
+So python can load your installed libraries, you need to update your `PYTHONPATH`:
 
     export PYTHONPATH=$(brew --prefix)/lib/python2.7/site-packages
 
-See Also
---------
+And for any scripts to be found, you need to update your `PATH`:
 
-brew-pip's half brother [brew-gem](https://github.com/josh/brew-gem).
+    export PATH=$PATH:$(brew --prefix)/share/python
