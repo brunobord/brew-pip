@@ -1,12 +1,9 @@
      _                                  _       
     | |__  _ __ _____      __     _ __ (_)_ __  
-    | '_ \| '__/ _ \ \ /\ / /____| '_ \| | '_ \ 
-    | |_) | | |  __/\ V  V /_____| |_) | | |_) |
+    | '_ \| '__/ _ \ \ /\ / /____| '_ \| | '_ \      brew pip installs python packages
+    | |_) | | |  __/\ V  V /_____| |_) | | |_) |            inside of Homebrew.
     |_.__/|_|  \___| \_/\_/      | .__/|_| .__/ 
                                  |_|     |_|    
-
-
-`brew pip` installs python packages inside of Homebrew.
 
 Install
 -------
