@@ -42,3 +42,15 @@ With `brew pip` you can globally install a select few packages while
 relying on virtualenv for everything else.
 
 It's the best of both worlds.
+
+Changelog
+---------
+
+v0.3.0 *(2011-12-26)*
+
+- Add `brew-pip.rb` for Homebrew installation
+- Can accept local source distributions for installation
+
+v0.2.0 *(2011-12-25)*
+
+- Use pip directly, instead of creating temporary formula files.
