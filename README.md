@@ -15,6 +15,7 @@ Usage
 
     brew pip mercurial        # install the latest mercurial package
     brew pip django==1.2      # install django-1.2
+    brew pip ~/tox-1.3.tar.gz # can install local packages, too
     brew pip -u django==1.3.1 # upgrade to django-1.3.1
     brew pip -k ipython       # install ipython, but don't link it (i.e., keg-only)
     brew rm django            # uninstallation taken care of by homebrew itself
