@@ -66,15 +66,9 @@ def main(args):
         prefix = os.path.join(HOMEBREW_CELLAR, package_name, version)
         cache = get_cache_dir()
 
-        if os.path.isfile(os.path.expanduser(package)):
-            install = package
-        else:
-            install = "%s==%s" % (package_name, version)
-
         cmd = ["pip", "install",
                "-v" if args.verbose else "",
-               install,
-               "--download-cache=%s" % cache if cache else "",
+               package,
                "--install-option=--prefix=%s" % prefix,
                "--install-option=--install-scripts=%s" % os.path.join(prefix, "share", "python")]
 
