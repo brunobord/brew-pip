@@ -7,7 +7,7 @@ import argparse
 import xmlrpclib
 
 PYPI_ENDPOINT = "http://pypi.python.org/pypi"
-HOMEBREW_CELLAR = os.environ.get("HOMEBREW_CELLAR", "/usr/local/Cellar")
+HOMEBREW_CELLAR = os.environ.get("HOMEBREW_CELLAR")
 CACHE_LOCATION = os.environ.get("PIP_DOWNLOAD_CACHE") or os.environ.get("HOMEBREW_CACHE")
 
 def get_package_info(package):
