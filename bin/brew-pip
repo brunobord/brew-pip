@@ -3,6 +3,8 @@
 import re
 import os
 import sys
+import shutil
+import tempfile
 import argparse
 import xmlrpclib
 
@@ -55,10 +57,12 @@ def main(args):
             os.system("brew rm %s" % package_name)
 
         prefix = os.path.join(HOMEBREW_CELLAR, package_name, version)
+        build_dir = tempfile.mkdtemp(prefix='brew-pip-')
 
         cmd = ["pip", "install",
                "-v" if args.verbose else "",
                package,
+               "--build=%s" % build_dir,
                "--install-option=--prefix=%s" % prefix,
                "--install-option=--install-scripts=%s" % os.path.join(prefix, "share", "python")]
 
@@ -72,6 +76,8 @@ def main(args):
 
         if not args.keg_only:
             os.system("brew link %s" % package_name)
+
+        shutil.rmtree(build_dir)
 
 parser = argparse.ArgumentParser(prog='brew pip')
 parser.add_argument("-v", "--verbose", action="store_true", default=False, help="be verbose")
