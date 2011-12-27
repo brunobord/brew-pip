@@ -47,6 +47,11 @@ It's the best of both worlds.
 Changelog
 ---------
 
+v0.4.0 *(In development)*
+
+- Much more robust handling of different package syntaxes
+- Can install VCS packages
+
 v0.3.0 *(2011-12-26)*
 
 - Add `brew-pip.rb` for Homebrew installation
