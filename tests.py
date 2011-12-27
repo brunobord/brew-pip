@@ -25,9 +25,9 @@ def test_get_package_info():
         tools.eq_(info, answer)
 
 @tools.raises(AssertionError)
-def missing_egg_causes_assertion_error():
+def test_missing_egg_raises_assertion_error():
     get_package_info("git+https://github.com/edavis/django-memcached")
 
 @tools.raises(AssertionError)
-def nonexistent_packages_raise_assertion_error():
+def test_nonexistent_packages_raises_assertion_error():
     get_package_info("alksdjf949jla")
