@@ -15,6 +15,8 @@ CACHE_LOCATION = os.environ.get("PIP_DOWNLOAD_CACHE") or os.environ.get("HOMEBRE
 VERSION_REGEXP = r'(?P<name>[\w-]+)-(?P<version>[0-9.-_]+)\.'
 ENABLED_PIP_VCS_BACKENDS = tuple(VcsSupport.schemes)
 
+class NoPackageInfo(Exception): pass
+
 def get_package_info(package):
     """
     Return (package_name, version) for a given package.
@@ -22,7 +24,7 @@ def get_package_info(package):
     If the version isn't specified in package, query PyPI for the
     latest.
     """
-    name, version = '', 'unknown'
+    name, version = None, None
 
     result = re.search(VERSION_REGEXP, os.path.basename(package))
     if result:
@@ -47,7 +49,11 @@ def get_package_info(package):
         name = package
         version = releases[0]
 
-    return (name.lower(), version)
+    if name and version:
+        return (name.lower(), version)
+    else:
+        raise NoPackageInfo("Couldn't determine either name (%r) or version (%r) "
+                            "for the requested package (%r).  Aborting." % (name, version, package))
 
 def main(args):
     for package in args.package:
