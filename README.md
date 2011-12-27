@@ -47,7 +47,7 @@ It's the best of both worlds.
 Changelog
 ---------
 
-v0.4.0 *(In development)*
+*(In development)*
 
 - Much more robust handling of different package syntaxes
 - Can install VCS packages
