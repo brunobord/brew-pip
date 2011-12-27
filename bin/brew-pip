@@ -7,10 +7,13 @@ import shutil
 import tempfile
 import argparse
 import xmlrpclib
+from pip.vcs import VcsSupport
 
 PYPI_ENDPOINT = "http://pypi.python.org/pypi"
 HOMEBREW_CELLAR = os.environ.get("HOMEBREW_CELLAR")
 CACHE_LOCATION = os.environ.get("PIP_DOWNLOAD_CACHE") or os.environ.get("HOMEBREW_CACHE")
+VERSION_REGEXP = r'(?P<name>[\w-]+)-(?P<version>[0-9.-_]+)\.'
+ENABLED_PIP_VCS_BACKENDS = tuple(VcsSupport.schemes)
 
 def get_package_info(package):
     """
@@ -18,36 +21,31 @@ def get_package_info(package):
 
     If the version isn't specified in package, query PyPI for the
     latest.
-
-    >>> get_package_info('Django==1.2')
-    ('django', '1.2')
-    >>> get_package_info('django')
-    ('django', '1.3.1')
-    >>> get_package_info('~/src/transmissionrpc/dist/transmission-0.9.tar.gz')
-    ('transmissionrpc', '0.9')
     """
-    if '==' in package:
-        (package, version) = package.split('==')
-    elif os.path.isfile(os.path.expanduser(package)):
-        base = os.path.basename(package)
-        result = re.search('^(?P<package>[^-]+)-(?P<version>.+).(tar|zip)', base)
-        if result:
-            package = result.group('package')
-            version = result.group('version')
+    name, version = '', 'unknown'
+
+    result = re.search(VERSION_REGEXP, os.path.basename(package))
+    if result:
+        name = result.group('name')
+        version = result.group('version')
+    elif package.startswith(ENABLED_PIP_VCS_BACKENDS):
+        name = os.path.basename(package)
+        version = 'HEAD'
+    elif '==' in package:
+        name, version = package.split('==')
     else:
         client = xmlrpclib.ServerProxy(PYPI_ENDPOINT)
         releases = client.package_releases(package)
         if not releases:
-            if package.islower():
-                # Try again capitalizing it
-                return get_package_info(package.capitalize())
-            else:
-                sys.stderr.write("Couldn't find any packages named '%s'\n" % package)
-                sys.exit(1)
-        else:
-            version = releases[0]
-    # Lowercase the package name for consistency sake
-    return (package.lower(), str(version))
+            # PyPI searching is case-sensitive, so try a capitalized
+            # version of the package name if the above didn't find
+            # anything.
+            releases = client.package_releases(package.capitalize())
+            assert releases, "Couldn't find any package named '%s'" % package
+        name = package
+        version = releases[0]
+
+    return (name.lower(), version)
 
 def main(args):
     for package in args.package:
@@ -79,9 +77,10 @@ def main(args):
 
         shutil.rmtree(build_dir)
 
-parser = argparse.ArgumentParser(prog='brew pip')
-parser.add_argument("-v", "--verbose", action="store_true", default=False, help="be verbose")
-parser.add_argument("-k", "--keg-only", action="store_true", default=False, help="don't link files into prefix")
-parser.add_argument("-u", "--upgrade", action="store_true", default=False, help="upgrade the package")
-parser.add_argument("package", nargs='+', help="name of the package(s) to install")
-main(parser.parse_args())
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(prog='brew pip')
+    parser.add_argument("-v", "--verbose", action="store_true", default=False, help="be verbose")
+    parser.add_argument("-k", "--keg-only", action="store_true", default=False, help="don't link files into prefix")
+    parser.add_argument("-u", "--upgrade", action="store_true", default=False, help="upgrade the package")
+    parser.add_argument("package", nargs='+', help="name of the package(s) to install")
+    main(parser.parse_args())
