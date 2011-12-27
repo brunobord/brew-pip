@@ -4,6 +4,7 @@
 #
 # For this reason I create a symlink in lib/ instead.
 
+from nose import tools
 from lib.brew_pip import get_package_info
 
 def test_get_package_info():
@@ -16,9 +17,14 @@ def test_get_package_info():
         ('./transmissionrpc-0.9.zip', ('transmissionrpc', '0.9')),
         ('~/src/transmissionrpc-0.9.tar.gz', ('transmissionrpc', '0.9')),
         ('http://example.com/transmissionrpc-0.9.tar.gz', ('transmissionrpc', '0.9')),
-        ('git+https://github.com/edavis/django-memcached2', ('django-memcached2', 'HEAD')),
+        ('git+https://github.com/edavis/django-memcached#egg=django-memcached2', ('django-memcached2', 'HEAD')),
     ]
 
     for s, answer in tests:
         info = get_package_info(s)
-        assert info == answer, ("%s != %s" % (info, answer))
+        tools.eq_(info, answer)
+
+@tools.raises(AssertionError)
+def missing_egg_causes_assertion_error():
+    get_package_info("git+https://github.com/edavis/django-memcached")
+
