@@ -47,10 +47,11 @@ It's the best of both worlds.
 Changelog
 ---------
 
-*(In development)*
+*In development*
 
 - Much more robust handling of different package syntaxes
 - Can install VCS packages
+- Add test suite
 
 v0.3.0 *(2011-12-26)*
 
