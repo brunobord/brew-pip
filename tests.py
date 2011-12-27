@@ -18,6 +18,8 @@ def test_get_package_info():
         ('~/src/transmissionrpc-0.9.tar.gz', ('transmissionrpc', '0.9')),
         ('http://example.com/transmissionrpc-0.9.tar.gz', ('transmissionrpc', '0.9')),
         ('git+https://github.com/edavis/django-memcached#egg=django-memcached2', ('django-memcached2', 'HEAD')),
+        ('gitegginfo==0.3', ('gitegginfo', '0.3')),
+        ('gitegginfo', ('gitegginfo', '0.3')),
     ]
 
     for s, answer in tests:

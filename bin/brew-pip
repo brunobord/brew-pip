@@ -13,7 +13,7 @@ PYPI_ENDPOINT = "http://pypi.python.org/pypi"
 HOMEBREW_CELLAR = os.environ.get("HOMEBREW_CELLAR")
 CACHE_LOCATION = os.environ.get("PIP_DOWNLOAD_CACHE") or os.environ.get("HOMEBREW_CACHE")
 VERSION_REGEXP = r'(?P<name>[\w-]+)-(?P<version>[0-9.-_]+)\.'
-ENABLED_PIP_VCS_BACKENDS = tuple(VcsSupport.schemes)
+ENABLED_PIP_VCS_BACKENDS = tuple(["%s+" % scheme for scheme in VcsSupport.schemes])
 
 class NoPackageInfo(Exception): pass
 
