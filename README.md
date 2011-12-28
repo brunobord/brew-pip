@@ -47,6 +47,10 @@ It's the best of both worlds.
 Changelog
 ---------
 
+*In development*
+
+- Add a `--version` argument
+
 v0.4.0 *(2011-12-28)*
 
 - Much more robust handling of different package syntaxes
