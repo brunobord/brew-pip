@@ -50,6 +50,7 @@ Changelog
 *In development*
 
 - Add a `--version` argument
+- Handles `@rev` syntax correctly
 
 v0.4.0 *(2011-12-28)*
 

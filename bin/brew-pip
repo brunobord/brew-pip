@@ -27,15 +27,20 @@ def get_package_info(package):
     """
     name, version = None, None
 
-    result = re.search(VERSION_REGEXP, os.path.basename(package))
-    if result:
-        name = result.group('name')
-        version = result.group('version')
-    elif package.startswith(ENABLED_PIP_VCS_BACKENDS):
+    if package.startswith(ENABLED_PIP_VCS_BACKENDS):
         assert "#egg=" in package, "VCS package missing an '#egg=' identifier"
         result = re.search('#egg=(?P<name>.+)$', package)
         name = result.group('name')
-        version = 'HEAD'
+
+        result = re.search('@(?P<version>[^#]+)#', package)
+        if result:
+            version = "rev-" + result.group('version')
+        else:
+            version = 'HEAD'
+    elif re.search(VERSION_REGEXP, os.path.basename(package)):
+        result = re.search(VERSION_REGEXP, os.path.basename(package))
+        name = result.group('name')
+        version = result.group('version')
     elif '==' in package:
         name, version = package.split('==')
     else:

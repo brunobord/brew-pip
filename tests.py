@@ -20,6 +20,9 @@ def test_get_package_info():
         ('~/src/transmissionrpc-0.9.tar.gz', ('transmissionrpc', '0.9')),
         ('http://example.com/transmissionrpc-0.9.tar.gz', ('transmissionrpc', '0.9')),
         ('git+https://github.com/edavis/django-memcached#egg=django-memcached2', ('django-memcached2', 'HEAD')),
+        ('git+https://github.com/edavis/django-memcached@c5334ba72661cb7e8364713240f777b2dcbb457e#egg=django-memcached2', ('django-memcached2', 'rev-c5334ba72661cb7e8364713240f777b2dcbb457e')),
+        ('hg+https://bitbucket.org/blueluna/transmissionrpc@b2cd245b3af8#egg=transmissionrpc', ('transmissionrpc', 'rev-b2cd245b3af8')),
+        ('hg+https://bitbucket.org/blueluna/transmissionrpc@release-0.8#egg=transmissionrpc', ('transmissionrpc', 'rev-release-0.8')),
         ('gitegginfo==0.3', ('gitegginfo', '0.3')),
         ('gitegginfo', ('gitegginfo', '0.3')),
     ]
