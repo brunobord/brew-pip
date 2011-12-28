@@ -8,11 +8,11 @@ from nose import tools
 from lib.brew_pip import get_package_info
 
 def test_get_package_info():
+    """
+    Get version numbers from the package itself.
+    """
     tests = [
-        ('Django', ('django', '1.3.1')),
-        ('django', ('django', '1.3.1')), # lowercase, too
         ('Django==1.2', ('django', '1.2')),
-        ('Django>=1.2', ('django', '1.3.1')),
         ('./transmissionrpc-0.9.tar.gz', ('transmissionrpc', '0.9')),
         ('./transmissionrpc-0.9.tar.bz2', ('transmissionrpc', '0.9')),
         ('transmissionrpc-0.9.tar.gz', ('transmissionrpc', '0.9')),
@@ -24,12 +24,26 @@ def test_get_package_info():
         ('hg+https://bitbucket.org/blueluna/transmissionrpc@b2cd245b3af8#egg=transmissionrpc', ('transmissionrpc', 'rev-b2cd245b3af8')),
         ('hg+https://bitbucket.org/blueluna/transmissionrpc@release-0.8#egg=transmissionrpc', ('transmissionrpc', 'rev-release-0.8')),
         ('gitegginfo==0.3', ('gitegginfo', '0.3')),
-        ('gitegginfo', ('gitegginfo', '0.3')),
     ]
 
     for s, answer in tests:
         info = get_package_info(s)
         tools.eq_(info, answer)
+
+def test_get_package_info_pypi():
+    """
+    Use PyPI's XML-RPC interface for version numbers.
+
+    Helps speed things up a bit if we can avoid network access.
+    """
+    tests = [
+        ('Django', ('django', '1.3.1')),
+        ('django', ('django', '1.3.1')), # lowercase, too
+        ('Django>=1.2', ('django', '1.3.1')),
+        ('gitegginfo', ('gitegginfo', '0.3')),
+    ]
+    for package, result in tests:
+        tools.eq_(get_package_info(package), result)
 
 @tools.raises(AssertionError)
 def test_missing_egg_raises_assertion_error():
