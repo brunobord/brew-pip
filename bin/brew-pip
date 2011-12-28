@@ -39,6 +39,8 @@ def get_package_info(package):
         name, version = package.split('==')
     else:
         client = xmlrpclib.ServerProxy(PYPI_ENDPOINT)
+        if '>=' in package:
+            (package, _) = package.split('>=')
         releases = client.package_releases(package)
         if not releases:
             # PyPI searching is case-sensitive, so try a capitalized
