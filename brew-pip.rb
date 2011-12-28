@@ -1,9 +1,9 @@
 require 'formula'
 
 class BrewPip < Formula
-  url 'https://github.com/edavis/brew-pip/tarball/v0.3.0'
+  url 'https://github.com/edavis/brew-pip/tarball/v0.4.0'
   homepage 'https://github.com/edavis/brew-pip'
-  md5 'a4c3b18f21789b65543a3873550242ca'
+  md5 '2c520aaa0eb04c82eba26e4e86e616bc'
   depends_on 'python'
 
   def install
