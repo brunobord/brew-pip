@@ -8,7 +8,8 @@
 Install
 -------
 
-    brew install https://raw.github.com/edavis/brew-pip/master/brew-pip.rb
+    $ curl -sSL https://raw.github.com/edavis/brew-pip/master/brew_pip.py > ~/bin/brew-pip
+    $ chmod +x ~/bin/brew-pip
 
 Usage
 -----
