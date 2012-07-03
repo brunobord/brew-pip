@@ -33,6 +33,11 @@ And for any scripts to be found, you need to update your `PATH`:
 
     export PATH=$PATH:$(brew --prefix)/share/python
 
+Remember to add this environment variable in your shell profile, usually like:
+
+    export HOMEBREW_CELLAR=$(brew --prefix)/Cellar
+
+
 But doesn't everybody use virtualenv now?
 -----------------------------------------
 
